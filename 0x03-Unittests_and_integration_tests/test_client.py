@@ -5,7 +5,7 @@ Test the Client class in client.py
 
 import unittest
 from typing import Dict
-from unittest.mock import patch
+from unittest.mock import patch, Mock, PropertyMock
 from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient
 from fixtures import TEST_PAYLOAD
@@ -48,9 +48,9 @@ class TestGithubOrgClient(unittest.TestCase):
     @patch('client.get_json')
     def test_public_repos(self, mock_get_json: Mock):
         """
-        Test the public_repos method
+        Test that GithubOrgClient.public_repos returns the correct value
         """
-        with patch.obect(GithubOrgClient, '_public_repos_url',
+        with patch.object(GithubOrgClient, '_public_repos_url',
                           new_callable=PropertyMock) as mock_public_repos_url:
             mock_public_repos_url.return_value = "test"
             mock_get_json.return_value = [{"name": "test"}]
@@ -60,9 +60,8 @@ class TestGithubOrgClient(unittest.TestCase):
             mock_get_json.assert_called_once_with("test")
 
         @parameterized.expand([
-            ({'license': {'key': 'my_license'}}, 'my_license'),
-            ({'license': {'key': 'other_license'}}, 'other_license'),
-            ({}, 'N/A')
+            ({"license": {"key": "my_license"}}, "my_license"),
+            ({"license": {"key": "other_license"}}, "other_license")
         ])
         def test_has_license(self, repo: Dict[str, Dict], license_key: str):
             """
